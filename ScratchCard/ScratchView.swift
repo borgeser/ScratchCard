@@ -9,17 +9,6 @@
 import Foundation
 import UIKit
 
-var width: Int!
-var height: Int!
-var location: CGPoint!
-var previousLocation: CGPoint!
-var firstTouch: Bool!
-var scratchable: CGImage!
-var scratched: CGImage!
-var alphaPixels: CGContext!
-var provider: CGDataProvider!
-var maskImage: String!
-var scratchWidth: CGFloat!
 
 internal protocol ScratchViewDelegate: class {
     func began(_ view: ScratchView)
@@ -28,29 +17,39 @@ internal protocol ScratchViewDelegate: class {
 }
 
 open class ScratchView: UIView {
+    private var width: Int!
+    private var height: Int!
+    private var location: CGPoint!
+    private var previousLocation: CGPoint!
+    private var firstTouch: Bool!
+    private var scratchable: CGImage?
+    private var scratched: CGImage!
+    private var alphaPixels: CGContext!
+    private var provider: CGDataProvider!
+    private var scratchWidth: CGFloat
     
     weak var delegate: ScratchViewDelegate?
-    internal var position: CGPoint!
+    private(set) internal var position: CGPoint = CGPoint.zero
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        self.initialize()
+    override convenience init(frame: CGRect) {
+        self.init(frame: frame, maskImage: nil, scratchWidth: 0)
     }
     
-    init(frame: CGRect, MaskImage: String, ScratchWidth: CGFloat) {
+    init(frame: CGRect, maskImage: CGImage?, scratchWidth: CGFloat) {
+        self.scratchWidth = scratchWidth
+        scratchable = maskImage
         super.init(frame: frame)
-        maskImage = MaskImage
-        scratchWidth = ScratchWidth
         self.initialize()
     }
     
     required public init?(coder aDecoder: NSCoder) {
+        scratchWidth = 0
+        scratchable = nil
         super.init(coder: aDecoder)
         self.initialize()
     }
     
     private func initialize() {
-        scratchable = UIImage(named: maskImage)!.cgImage
         width = (Int)(self.frame.width)
         height = (Int)(self.frame.height)
         
@@ -70,7 +69,7 @@ open class ScratchView: UIView {
         alphaPixels.setLineCap(CGLineCap.round)
         
         let mask: CGImage = CGImage(maskWidth: width, height: height, bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: width, provider: provider, decode: nil, shouldInterpolate: false)!
-        scratched = scratchable.masking(mask)
+        scratched = scratchable?.masking(mask)
     }
     
     override open func touchesBegan(_ touches: Set<UITouch>,

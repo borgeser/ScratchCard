@@ -9,11 +9,6 @@
 import Foundation
 import UIKit
 
-var couponImage: UIImageView!
-public var scratchCard: ScratchView!
-var coupon: String!
-var uiScratchWidth: CGFloat!
-
 @objc public protocol ScratchUIViewDelegate: class {
     @objc optional func scratchBegan(_ view: ScratchUIView)
     @objc optional func scratchMoved(_ view: ScratchUIView)
@@ -21,24 +16,26 @@ var uiScratchWidth: CGFloat!
 }
 
 open class ScratchUIView: UIView, ScratchViewDelegate {
+
+    private var scratchCard: ScratchView!
+    private var couponImage: UIImageView!
     
     open weak var delegate: ScratchUIViewDelegate!
     open var scratchPosition: CGPoint!
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.Init()
+        self.Init(maskImage: nil, scratchWidth: 0)
     }
     
     open func getScratchPercent() -> Double {
         return scratchCard.getAlphaPixelPercent()
     }
     
-    public init(frame: CGRect, Coupon: String, MaskImage: String, ScratchWidth: CGFloat) {
+    public init(frame: CGRect, Coupon: String, maskImage: CGImage?, scratchWidth: CGFloat) {
         super.init(frame: frame)
-        coupon = Coupon
-        maskImage = MaskImage
-        uiScratchWidth = ScratchWidth
-        self.Init()
+        couponImage = UIImageView(image: UIImage(named: Coupon))
+        self.Init(maskImage: maskImage, scratchWidth: scratchWidth)
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -46,9 +43,8 @@ open class ScratchUIView: UIView, ScratchViewDelegate {
         self.InitXib()
     }
     
-    fileprivate func Init() {
-        couponImage = UIImageView(image: UIImage(named: coupon))
-        scratchCard = ScratchView(frame: self.frame, MaskImage: maskImage, ScratchWidth: uiScratchWidth)
+    private func Init(maskImage: CGImage?, scratchWidth: CGFloat) {
+        scratchCard = ScratchView(frame: self.frame, maskImage: maskImage, scratchWidth: scratchWidth)
         
         couponImage.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height)
         scratchCard.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height)

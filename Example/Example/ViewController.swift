@@ -16,8 +16,8 @@ class ViewController: UIViewController, ScratchUIViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
-        scratchCard = ScratchUIView(frame: view.frame, Coupon: "image.jpg", MaskImage: "mask.png", ScratchWidth: CGFloat(40))
+        let maskImage = UIImage(named: "mask.png")?.cgImage
+        scratchCard = ScratchUIView(frame: view.frame, Coupon: "image.jpg", maskImage: maskImage, scratchWidth: CGFloat(40))
         scratchCard.delegate = self
         
         self.view.addSubview(scratchCard)
