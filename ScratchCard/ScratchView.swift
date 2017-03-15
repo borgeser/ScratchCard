@@ -11,9 +11,9 @@ import UIKit
 
 
 @objc public protocol ScratchViewDelegate: class {
-    func began(_ view: ScratchView)
-    func moved(_ view: ScratchView)
-    func ended(_ view: ScratchView)
+    @objc optional func began(_ view: ScratchView)
+    @objc optional func moved(_ view: ScratchView)
+    @objc optional func ended(_ view: ScratchView)
 }
 
 open class ScratchView: UIView {
@@ -73,7 +73,7 @@ open class ScratchView: UIView {
             if let touch = touches.first {
                 currentLocation = CGPoint(x: touch.location(in: self).x, y: self.frame.size.height-touch.location(in: self).y)
                 previousLocation = currentLocation
-                self.delegate?.began(self)
+                self.delegate?.began?(self)
         }
     }
     
@@ -84,7 +84,7 @@ open class ScratchView: UIView {
                 previousLocation = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
                 
                 renderLineFromPoint(previousLocation, end: currentLocation)
-                self.delegate?.moved(self)
+                self.delegate?.moved?(self)
             }
     }
     
@@ -93,7 +93,7 @@ open class ScratchView: UIView {
             if let touch = touches.first {
                 previousLocation = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
                 renderLineFromPoint(previousLocation, end: currentLocation)
-                self.delegate?.ended(self)
+                self.delegate?.ended?(self)
             }
     }
     
