@@ -60,8 +60,8 @@ open class ScratchUIView: UIView, ScratchViewDelegate {
             guard self.delegate.scratchBegan != nil else {
                 return
             }
-            if view.position.x >= 0 && view.position.x <= view.frame.width && view.position.y >= 0 && view.position.y <= view.frame.height  {
-                scratchPosition = view.position
+            if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
+                scratchPosition = view.previousLocation
             }
             self.delegate.scratchBegan!(self)
         }
@@ -72,8 +72,8 @@ open class ScratchUIView: UIView, ScratchViewDelegate {
             guard self.delegate.scratchMoved != nil else {
                 return
             }
-            if view.position.x >= 0 && view.position.x <= view.frame.width && view.position.y >= 0 && view.position.y <= view.frame.height  {
-                scratchPosition = view.position
+            if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
+                scratchPosition = view.previousLocation
             }
             self.delegate.scratchMoved!(self)
         }
@@ -84,8 +84,8 @@ open class ScratchUIView: UIView, ScratchViewDelegate {
             guard self.delegate.scratchEnded != nil else {
                 return
             }
-            if view.position.x >= 0 && view.position.x <= view.frame.width && view.position.y >= 0 && view.position.y <= view.frame.height  {
-                scratchPosition = view.position
+            if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
+                scratchPosition = view.previousLocation
             }
             self.delegate.scratchEnded!(self)
         }

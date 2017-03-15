@@ -17,15 +17,15 @@ internal protocol ScratchViewDelegate: class {
 }
 
 open class ScratchView: UIView {
-    private var location: CGPoint!
     private var scratchable: CGImage?
     private var scratched: CGImage!
     private var alphaPixels: CGContext!
     private var provider: CGDataProvider!
     private var scratchWidth: CGFloat
-    
+
     weak var delegate: ScratchViewDelegate?
-    private(set) internal var position: CGPoint = CGPoint.zero
+    private(set) var currentLocation: CGPoint = CGPoint.zero
+    private(set) var previousLocation: CGPoint = CGPoint.zero
 
     override convenience init(frame: CGRect) {
         self.init(frame: frame, maskImage: nil, scratchWidth: 0)
@@ -71,8 +71,8 @@ open class ScratchView: UIView {
     override open func touchesBegan(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
-                location = CGPoint(x: touch.location(in: self).x, y: self.frame.size.height-touch.location(in: self).y)
-                position = location
+                currentLocation = CGPoint(x: touch.location(in: self).x, y: self.frame.size.height-touch.location(in: self).y)
+                previousLocation = currentLocation
                 self.delegate?.began(self)
         }
     }
@@ -80,10 +80,10 @@ open class ScratchView: UIView {
     override open func touchesMoved(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
-                location = CGPoint(x: touch.location(in: self).x, y: self.frame.size.height-touch.location(in: self).y)
-                position = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
+                currentLocation = CGPoint(x: touch.location(in: self).x, y: self.frame.size.height-touch.location(in: self).y)
+                previousLocation = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
                 
-                renderLineFromPoint(position, end: location)
+                renderLineFromPoint(previousLocation, end: currentLocation)
                 self.delegate?.moved(self)
             }
     }
@@ -91,8 +91,8 @@ open class ScratchView: UIView {
     override open func touchesEnded(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
-                position = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
-                renderLineFromPoint(position, end: location)
+                previousLocation = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
+                renderLineFromPoint(previousLocation, end: currentLocation)
                 self.delegate?.ended(self)
             }
     }
