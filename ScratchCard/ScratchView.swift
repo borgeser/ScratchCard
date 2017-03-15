@@ -104,12 +104,10 @@ open class ScratchView: UIView {
     override open func touchesEnded(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
-                if firstTouch {
-                    firstTouch = false
-                    position = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
-                    renderLineFromPoint(position, end: location)
-                    self.delegate?.ended(self)
-                }
+                firstTouch = false
+                position = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
+                renderLineFromPoint(position, end: location)
+                self.delegate?.ended(self)
             }
     }
     
