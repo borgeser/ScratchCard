@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 
-internal protocol ScratchViewDelegate: class {
+@objc public protocol ScratchViewDelegate: class {
     func began(_ view: ScratchView)
     func moved(_ view: ScratchView)
     func ended(_ view: ScratchView)
@@ -27,11 +27,11 @@ open class ScratchView: UIView {
     private(set) var currentLocation: CGPoint = CGPoint.zero
     private(set) var previousLocation: CGPoint = CGPoint.zero
 
-    override convenience init(frame: CGRect) {
+    override public convenience init(frame: CGRect) {
         self.init(frame: frame, maskImage: nil, scratchWidth: 0)
     }
     
-    init(frame: CGRect, maskImage: CGImage?, scratchWidth: CGFloat) {
+    public init(frame: CGRect, maskImage: CGImage?, scratchWidth: CGFloat) {
         self.scratchWidth = scratchWidth
         scratchable = maskImage
         super.init(frame: frame)
@@ -113,7 +113,7 @@ open class ScratchView: UIView {
         self.setNeedsDisplay()
     }
     
-    func getAlphaPixelPercent() -> Double {
+    public func getAlphaPixelPercent() -> Double {
         let pixelData = alphaPixels.makeImage()?.dataProvider?.data
         let data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
         let imageWidth: size_t = alphaPixels.makeImage()!.width

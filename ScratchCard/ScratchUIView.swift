@@ -57,21 +57,21 @@ open class ScratchUIView: UIView, ScratchViewDelegate {
         
     }
     
-    internal func began(_ view: ScratchView) {
+    public func began(_ view: ScratchView) {
         if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
             scratchPosition = view.previousLocation
         }
         self.delegate?.scratchBegan?(self)
     }
 
-    internal func moved(_ view: ScratchView) {
+    public func moved(_ view: ScratchView) {
         if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
             scratchPosition = view.previousLocation
         }
         self.delegate?.scratchMoved?(self)
     }
 
-    internal func ended(_ view: ScratchView) {
+    public func ended(_ view: ScratchView) {
         if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
             scratchPosition = view.previousLocation
         }
