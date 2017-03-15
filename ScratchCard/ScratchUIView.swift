@@ -18,12 +18,13 @@ import UIKit
 open class ScratchUIView: UIView, ScratchViewDelegate {
 
     private var scratchCard: ScratchView!
-    private var couponImage: UIImageView!
+    private var couponImage: UIImageView
     
-    open weak var delegate: ScratchUIViewDelegate!
-    open var scratchPosition: CGPoint!
+    open weak var delegate: ScratchUIViewDelegate?
+    open var scratchPosition: CGPoint = CGPoint.zero
 
     override init(frame: CGRect) {
+        couponImage = UIImageView()
         super.init(frame: frame)
         self.Init(maskImage: nil, scratchWidth: 0)
     }
@@ -33,12 +34,13 @@ open class ScratchUIView: UIView, ScratchViewDelegate {
     }
     
     public init(frame: CGRect, Coupon: String, maskImage: CGImage?, scratchWidth: CGFloat) {
-        super.init(frame: frame)
         couponImage = UIImageView(image: UIImage(named: Coupon))
+        super.init(frame: frame)
         self.Init(maskImage: maskImage, scratchWidth: scratchWidth)
     }
     
     required public init?(coder aDecoder: NSCoder) {
+        couponImage = UIImageView()
         super.init(coder: aDecoder)
         self.InitXib()
     }
@@ -56,41 +58,27 @@ open class ScratchUIView: UIView, ScratchViewDelegate {
     }
     
     internal func began(_ view: ScratchView) {
-        if self.delegate != nil {
-            guard self.delegate.scratchBegan != nil else {
-                return
-            }
-            if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
-                scratchPosition = view.previousLocation
-            }
-            self.delegate.scratchBegan!(self)
+        if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
+            scratchPosition = view.previousLocation
         }
+        self.delegate?.scratchBegan?(self)
     }
-    
+
     internal func moved(_ view: ScratchView) {
-        if self.delegate != nil {
-            guard self.delegate.scratchMoved != nil else {
-                return
-            }
-            if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
-                scratchPosition = view.previousLocation
-            }
-            self.delegate.scratchMoved!(self)
+        if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
+            scratchPosition = view.previousLocation
         }
+        self.delegate?.scratchMoved?(self)
     }
-    
+
     internal func ended(_ view: ScratchView) {
-        if self.delegate != nil {
-            guard self.delegate.scratchEnded != nil else {
-                return
-            }
-            if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
-                scratchPosition = view.previousLocation
-            }
-            self.delegate.scratchEnded!(self)
+        if view.previousLocation.x >= 0 && view.previousLocation.x <= view.frame.width && view.previousLocation.y >= 0 && view.previousLocation.y <= view.frame.height  {
+            scratchPosition = view.previousLocation
         }
+        self.delegate?.scratchEnded?(self)
+
     }
-    
+
     fileprivate func InitXib() {
         
     }
