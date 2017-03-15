@@ -17,11 +17,8 @@ internal protocol ScratchViewDelegate: class {
 }
 
 open class ScratchView: UIView {
-    private var width: Int!
-    private var height: Int!
     private var location: CGPoint!
-    private var previousLocation: CGPoint!
-    private var firstTouch: Bool!
+    private var firstTouch: Bool = false
     private var scratchable: CGImage?
     private var scratched: CGImage!
     private var alphaPixels: CGContext!
@@ -50,8 +47,8 @@ open class ScratchView: UIView {
     }
     
     private func initialize() {
-        width = (Int)(self.frame.width)
-        height = (Int)(self.frame.height)
+        let width = Int(self.frame.width)
+        let height = Int(self.frame.height)
         
         self.isOpaque = false
         let colorspace: CGColorSpace = CGColorSpaceCreateDeviceGray()
@@ -77,9 +74,7 @@ open class ScratchView: UIView {
             if let touch = touches.first {
                 firstTouch = true
                 location = CGPoint(x: touch.location(in: self).x, y: self.frame.size.height-touch.location(in: self).y)
-                
                 position = location
-
                 self.delegate?.began(self)
         }
     }
@@ -87,7 +82,8 @@ open class ScratchView: UIView {
     override open func touchesMoved(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
-                if firstTouch! {
+                let previousLocation: CGPoint
+                if firstTouch {
                     firstTouch = false
                     previousLocation =  CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
                 } else {
@@ -108,14 +104,10 @@ open class ScratchView: UIView {
     override open func touchesEnded(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
-                if firstTouch! {
+                if firstTouch {
                     firstTouch = false
-                    previousLocation =  CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
-                    
-                    position = previousLocation
-                    
-                    renderLineFromPoint(previousLocation, end: location)
-
+                    position = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
+                    renderLineFromPoint(position, end: location)
                     self.delegate?.ended(self)
                 }
             }
