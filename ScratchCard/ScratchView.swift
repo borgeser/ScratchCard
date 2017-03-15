@@ -23,9 +23,9 @@ open class ScratchView: UIView {
     private var provider: CGDataProvider!
     private var scratchWidth: CGFloat
 
-    weak var delegate: ScratchViewDelegate?
-    private(set) var currentLocation: CGPoint = CGPoint.zero
-    private(set) var previousLocation: CGPoint = CGPoint.zero
+    public weak var delegate: ScratchViewDelegate?
+    private(set) public var currentLocation: CGPoint = CGPoint.zero
+    private(set) public var previousLocation: CGPoint = CGPoint.zero
 
     override public convenience init(frame: CGRect) {
         self.init(frame: frame, maskImage: nil, scratchWidth: 0)
