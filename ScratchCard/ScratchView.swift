@@ -29,27 +29,27 @@ internal protocol ScratchViewDelegate: class {
 
 open class ScratchView: UIView {
     
-    internal weak var delegate: ScratchViewDelegate!
+    weak var delegate: ScratchViewDelegate?
     internal var position: CGPoint!
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.Init()
+        self.initialize()
     }
     
     init(frame: CGRect, MaskImage: String, ScratchWidth: CGFloat) {
         super.init(frame: frame)
         maskImage = MaskImage
         scratchWidth = ScratchWidth
-        self.Init()
+        self.initialize()
     }
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        
-        self.InitXib()
+        self.initialize()
     }
     
-    fileprivate func Init() {
+    private func initialize() {
         scratchable = UIImage(named: maskImage)!.cgImage
         width = (Int)(self.frame.width)
         height = (Int)(self.frame.height)
@@ -73,10 +73,6 @@ open class ScratchView: UIView {
         scratched = scratchable.masking(mask)
     }
     
-    fileprivate func InitXib() {
-        
-    }
-    
     override open func touchesBegan(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
@@ -84,10 +80,8 @@ open class ScratchView: UIView {
                 location = CGPoint(x: touch.location(in: self).x, y: self.frame.size.height-touch.location(in: self).y)
                 
                 position = location
-                
-                if self.delegate != nil {
-                    self.delegate.began(self)
-                }
+
+                self.delegate?.began(self)
         }
     }
     
@@ -107,9 +101,8 @@ open class ScratchView: UIView {
                 
                 renderLineFromPoint(previousLocation, end: location)
                 
-                if self.delegate != nil {
-                    self.delegate.moved(self)
-                }
+
+                self.delegate?.moved(self)
             }
     }
     
@@ -123,10 +116,8 @@ open class ScratchView: UIView {
                     position = previousLocation
                     
                     renderLineFromPoint(previousLocation, end: location)
-                    
-                    if self.delegate != nil {
-                        self.delegate.ended(self)
-                    }
+
+                    self.delegate?.ended(self)
                 }
             }
     }
@@ -139,7 +130,7 @@ open class ScratchView: UIView {
         UIGraphicsGetCurrentContext()?.restoreGState()
     }
     
-    func renderLineFromPoint(_ start: CGPoint, end: CGPoint) {
+    private func renderLineFromPoint(_ start: CGPoint, end: CGPoint) {
         alphaPixels.move(to: CGPoint(x: start.x, y: start.y))
         alphaPixels.addLine(to: CGPoint(x: end.x, y: end.y))
         alphaPixels.strokePath()
@@ -147,7 +138,7 @@ open class ScratchView: UIView {
         self.setNeedsDisplay()
     }
     
-    internal func getAlphaPixelPercent() -> Double {
+    func getAlphaPixelPercent() -> Double {
         let pixelData = alphaPixels.makeImage()?.dataProvider?.data
         let data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
         let imageWidth: size_t = alphaPixels.makeImage()!.width
