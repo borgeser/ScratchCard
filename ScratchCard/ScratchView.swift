@@ -18,10 +18,10 @@ import UIKit
 
 open class ScratchView: UIView {
     private var scratchable: CGImage?
-    private var scratched: CGImage!
     private var alphaPixels: CGContext!
     private var provider: CGDataProvider!
     private var scratchWidth: CGFloat
+    private var contentLayer: CALayer = CALayer()
 
     public weak var delegate: ScratchViewDelegate?
     private(set) public var currentLocation: CGPoint = CGPoint.zero
@@ -50,22 +50,27 @@ open class ScratchView: UIView {
         let height = Int(self.frame.height)
         
         self.isOpaque = false
-        let colorspace: CGColorSpace = CGColorSpaceCreateDeviceGray()
+        let colorspace: CGColorSpace = CGColorSpaceCreateDeviceRGB()
         
-        let pixels: CFMutableData = CFDataCreateMutable(nil, width * height)
+        let pixels: CFMutableData = CFDataCreateMutable(nil, width * height * 4)
         
-        alphaPixels = CGContext( data: CFDataGetMutableBytePtr(pixels), width: width, height: height, bitsPerComponent: 8, bytesPerRow: width, space: colorspace, bitmapInfo: CGImageAlphaInfo.none.rawValue)
+        alphaPixels = CGContext( data: CFDataGetMutableBytePtr(pixels), width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4, space: colorspace, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         
         provider = CGDataProvider(data: pixels)
         
-        alphaPixels.setFillColor(UIColor.black.cgColor)
-        alphaPixels.fill(frame)
-        alphaPixels.setStrokeColor(UIColor.white.cgColor)
+        alphaPixels.setFillColor(red: 0, green: 0, blue: 0, alpha: 0)
+        alphaPixels.setStrokeColor(red: 255, green: 255, blue: 255, alpha: 1)
         alphaPixels.setLineWidth(scratchWidth)
         alphaPixels.setLineCap(CGLineCap.round)
         
-        let mask: CGImage = CGImage(maskWidth: width, height: height, bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: width, provider: provider, decode: nil, shouldInterpolate: false)!
-        scratched = scratchable?.masking(mask)
+        let mask: CGImage = CGImage(maskWidth: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4, provider: provider, decode: nil, shouldInterpolate: false)!
+        let maskLayer = CAShapeLayer()
+        maskLayer.frame =  CGRect(x:0, y:0, width:width, height:height)
+        maskLayer.contents = mask
+
+        contentLayer.frame =  CGRect(x:0, y:0, width:width, height:height)
+        contentLayer.contents = scratchable
+        contentLayer.mask = maskLayer
     }
     
     override open func touchesBegan(_ touches: Set<UITouch>,
@@ -98,11 +103,10 @@ open class ScratchView: UIView {
     }
     
     override open func draw(_ rect: CGRect) {
-        UIGraphicsGetCurrentContext()?.saveGState()
-        UIGraphicsGetCurrentContext()?.translateBy(x: 0, y: self.frame.size.height)
-        UIGraphicsGetCurrentContext()?.scaleBy(x: 1.0, y: -1.0)
-        UIGraphicsGetCurrentContext()?.draw(scratched, in: self.frame)
-        UIGraphicsGetCurrentContext()?.restoreGState()
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        context.saveGState()
+        contentLayer.render(in: context)
+        context.restoreGState()
     }
     
     private func renderLineFromPoint(_ start: CGPoint, end: CGPoint) {
@@ -123,10 +127,10 @@ open class ScratchView: UIView {
         var count: Double = 0
         
         for _ in 0...imageWidth * imageHeight {
-            if data[byteIndex + 3] != 0 {
+            if data[byteIndex] != 0 {
                 count += 1
             }
-            byteIndex += 1
+            byteIndex += 3
         }
         
         return count / Double(imageWidth * imageHeight)
