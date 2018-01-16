@@ -46,7 +46,8 @@ open class ScratchUIView: UIView, ScratchViewDelegate {
     }
     
     private func Init(maskImage: CGImage?, scratchWidth: CGFloat) {
-        scratchCard = ScratchView(frame: self.frame, maskImage: maskImage, scratchWidth: scratchWidth)
+        //TODO: (roborg) replace maskImage by couponImage
+        scratchCard = ScratchView(frame: self.frame, revealImage: maskImage, scratchWidth: scratchWidth)
         
         couponImage.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height)
         scratchCard.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height)

@@ -17,7 +17,7 @@ import UIKit
 }
 
 open class ScratchView: UIView {
-    private var scratchable: CGImage?
+    private var scratched: CGImage?
     private var alphaPixels: CGContext!
     private var provider: CGDataProvider!
     private var scratchWidth: CGFloat
@@ -30,19 +30,19 @@ open class ScratchView: UIView {
     private(set) public var previousLocation: CGPoint = CGPoint.zero
 
     override public convenience init(frame: CGRect) {
-        self.init(frame: frame, maskImage: nil, scratchWidth: 0)
+        self.init(frame: frame, revealImage: nil, scratchWidth: 0)
     }
     
-    public init(frame: CGRect, maskImage: CGImage?, scratchWidth: CGFloat) {
+    public init(frame: CGRect, revealImage: CGImage?, scratchWidth: CGFloat) {
         self.scratchWidth = scratchWidth
-        scratchable = ScratchView.processPixels(image: maskImage) ?? maskImage
+        scratched = ScratchView.processPixels(image: revealImage) ?? revealImage
         super.init(frame: frame)
         self.initialize()
     }
     
     required public init?(coder aDecoder: NSCoder) {
         scratchWidth = 0
-        scratchable = nil
+        scratched = nil
         super.init(coder: aDecoder)
         self.initialize()
     }
@@ -78,7 +78,7 @@ open class ScratchView: UIView {
         maskLayer.backgroundColor = UIColor.clear.cgColor
 
         contentLayer.frame =  CGRect(x:0, y:0, width:width, height:height)
-        contentLayer.contents = scratchable
+        contentLayer.contents = scratched
         contentLayer.mask = maskLayer
 
         layer.addSublayer(contentLayer)
