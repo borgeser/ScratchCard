@@ -22,6 +22,7 @@ open class ScratchView: UIView {
     private var provider: CGDataProvider!
     private var scratchWidth: CGFloat
     private var contentLayer: CALayer = CALayer()
+    private var maskLayer = CAShapeLayer()
 
     public weak var delegate: ScratchViewDelegate?
     private(set) public var currentLocation: CGPoint = CGPoint.zero
@@ -72,20 +73,20 @@ open class ScratchView: UIView {
 
         provider = CGDataProvider(data: pixels)
         
-        let mask: CGImage = CGImage(maskWidth: width, height: height, bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: width, provider: provider, decode: nil, shouldInterpolate: false)!
-        let maskLayer = CAShapeLayer()
         maskLayer.frame =  CGRect(x:0, y:0, width:width, height:height)
-        maskLayer.contents = mask
+        maskLayer.backgroundColor = UIColor.clear.cgColor
 
         contentLayer.frame =  CGRect(x:0, y:0, width:width, height:height)
         contentLayer.contents = scratchable
         contentLayer.mask = maskLayer
+
+        layer.addSublayer(contentLayer)
     }
     
     override open func touchesBegan(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
-                currentLocation = CGPoint(x: touch.location(in: self).x, y: self.frame.size.height-touch.location(in: self).y)
+                currentLocation = CGPoint(x: touch.location(in: self).x, y: touch.location(in: self).y)
                 previousLocation = currentLocation
                 self.delegate?.began?(self)
         }
@@ -94,8 +95,8 @@ open class ScratchView: UIView {
     override open func touchesMoved(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
-                currentLocation = CGPoint(x: touch.location(in: self).x, y: self.frame.size.height-touch.location(in: self).y)
-                previousLocation = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
+                currentLocation = CGPoint(x: touch.location(in: self).x, y: touch.location(in: self).y)
+                previousLocation = CGPoint(x: touch.previousLocation(in: self).x, y: touch.previousLocation(in: self).y)
                 
                 renderLineFromPoint(previousLocation, end: currentLocation)
                 self.delegate?.moved?(self)
@@ -105,17 +106,10 @@ open class ScratchView: UIView {
     override open func touchesEnded(_ touches: Set<UITouch>,
         with event: UIEvent?) {
             if let touch = touches.first {
-                previousLocation = CGPoint(x: touch.previousLocation(in: self).x, y: self.frame.size.height-touch.previousLocation(in: self).y)
+                previousLocation = CGPoint(x: touch.previousLocation(in: self).x, y: touch.previousLocation(in: self).y)
                 renderLineFromPoint(previousLocation, end: currentLocation)
                 self.delegate?.ended?(self)
             }
-    }
-    
-    override open func draw(_ rect: CGRect) {
-        guard let context = UIGraphicsGetCurrentContext() else { return }
-        context.saveGState()
-        contentLayer.render(in: context)
-        context.restoreGState()
     }
     
     private func renderLineFromPoint(_ start: CGPoint, end: CGPoint) {
@@ -123,7 +117,21 @@ open class ScratchView: UIView {
         alphaPixels.addLine(to: CGPoint(x: end.x, y: end.y))
         alphaPixels.strokePath()
         
-        self.setNeedsDisplay()
+        drawLine(onLayer: maskLayer, fromPoint: start, toPoint: end)
+    }
+
+    func drawLine(onLayer layer: CALayer, fromPoint start: CGPoint, toPoint end: CGPoint) {
+        let line = CAShapeLayer()
+        let linePath = UIBezierPath()
+        linePath.move(to: start)
+        linePath.addLine(to: end)
+        linePath.lineCapStyle = .round
+        line.lineWidth = scratchWidth
+        line.path = linePath.cgPath
+        line.opacity = 1
+        line.strokeColor = UIColor.white.cgColor
+        line.lineCap = "round"
+        layer.addSublayer(line)
     }
     
     public func getAlphaPixelPercent() -> Double {
