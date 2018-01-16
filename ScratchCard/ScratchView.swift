@@ -35,7 +35,7 @@ open class ScratchView: UIView {
     
     public init(frame: CGRect, maskImage: CGImage?, scratchWidth: CGFloat) {
         self.scratchWidth = scratchWidth
-        scratchable = maskImage
+        scratchable = ScratchView.processPixels(image: maskImage) ?? maskImage
         super.init(frame: frame)
         self.initialize()
     }
@@ -119,6 +119,42 @@ open class ScratchView: UIView {
         alphaPixels.strokePath()
         
         drawLine(onLayer: maskLayer, fromPoint: start, toPoint: end)
+    }
+
+    private static func processPixels(image: CGImage?) -> CGImage? {
+        guard let inputCGImage = image else {
+            return nil
+        }
+        let colorSpace       = CGColorSpaceCreateDeviceRGB()
+        let width            = inputCGImage.width
+        let height           = inputCGImage.height
+        let bytesPerPixel    = 4
+        let bitsPerComponent = 8
+        let bytesPerRow      = bytesPerPixel * width
+        let bitmapInfo       = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
+
+        guard let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: colorSpace, bitmapInfo: bitmapInfo) else {
+            return nil
+        }
+        context.draw(inputCGImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+        guard let buffer = context.data else {
+            return nil
+        }
+
+        let pixelBuffer = buffer.bindMemory(to: UInt8.self, capacity: width * height)
+        var byteIndex: Int  = 0
+        for _ in 0...width * height {
+            if  pixelBuffer[byteIndex] == 0 {
+                pixelBuffer[byteIndex] = 255
+                pixelBuffer[byteIndex+1] = 255
+                pixelBuffer[byteIndex+2] = 255
+                pixelBuffer[byteIndex+3] = 255
+            }
+            byteIndex += 4
+        }
+        let outputCGImage = context.makeImage()!
+        return outputCGImage
     }
 
     func drawLine(onLayer layer: CALayer, fromPoint start: CGPoint, toPoint end: CGPoint) {
